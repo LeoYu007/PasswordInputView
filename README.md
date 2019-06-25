@@ -1,6 +1,6 @@
  ## 一个支持多种风格的自定义的密码(验证码)输入框
 
- ![image]()
+ ![image](https://github.com/LambertCoding/PasswordInputView/blob/master/image/password_input_view.png)
 
 ## Features
 
@@ -10,7 +10,7 @@
 * 设置密码框之间的间隔和圆角(间隔为0时圆角只显示最左和最右的圆角)
 * 设置边框和密码的颜色
 
-### [关于原理，很简单啦，继承EditText，去掉原生的super.onDraw()，然后绘制每个边框和密码。大家看一下源码，注释还算清楚。]()
+### [关于原理，很简单啦，继承EditText，去掉原生的super.onDraw()，然后绘制每个边框和密码。大家看一下源码，注释还算清楚。](https://github.com/LambertCoding/PasswordInputView/blob/master/lib/src/main/java/com/matthew/passwordinput/lib/PasswordInputView.java)
 
 ## Usages
 
