@@ -6,7 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import android.graphics.Xfermode;
 import android.os.Build;
 import android.text.InputFilter;
 import android.util.AttributeSet;
@@ -38,6 +41,7 @@ public class PasswordInputView extends AppCompatEditText {
 
     private Path path;
     private RectF rectF;
+    private Xfermode xfermode;
 
     private float strokeWidth;
     private float boxWidth;
@@ -97,6 +101,9 @@ public class PasswordInputView extends AppCompatEditText {
 
         path = new Path();
         rectF = new RectF();
+
+//        xfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);
+        xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             this.setBackground(null);
@@ -162,23 +169,16 @@ public class PasswordInputView extends AppCompatEditText {
 
     @Override
     protected void onDraw(Canvas canvas) {
-//        super.onDraw(canvas); // 去掉EditText默认的绘制
+////        super.onDraw(canvas); // 去掉EditText默认的绘制
 
         int top = getPaddingTop();
         int bottom = getHeight() - getPaddingBottom();
-        int end = getWidth() - getPaddingRight();
-        float right;
+        int start = getPaddingLeft();
+        float left;
 
-//        int start = getPaddingLeft();
-//        float left;
-
-        for (int i = maxLength - 1; i >= 0; i--) {
-//            left = start + (boxWidth + spacing) * i;
-//            rectF.set(left, top, left + boxWidth, bottom);
-
-            right = end - (boxWidth + spacing) * (maxLength - 1 - i);
-            rectF.set(right - boxWidth, top, right, bottom);
-
+        for (int i = 0; i < maxLength; i++) {
+            left = start + (boxWidth + spacing) * i;
+            rectF.set(left, top, left + boxWidth, bottom);
             drawBorder(canvas, i);
 
             if (i >= textLength) continue;
@@ -216,10 +216,20 @@ public class PasswordInputView extends AppCompatEditText {
                             path.addRoundRect(rectF, radiusArray, Path.Direction.CCW);
                             canvas.drawPath(path, paint);
                         } else if (index == maxLength - 1) {
+                            // 这里绘制最后一个密码框的三条边，带圆角
+                            // 先绘制一个带两个圆角的方框，然后用xfermode合成去掉左边的一条边
+                            int layer = canvas.saveLayer(null, null, Canvas.ALL_SAVE_FLAG);
+
                             fillRadiusArray(false);
                             path.reset();
                             path.addRoundRect(rectF, radiusArray, Path.Direction.CCW);
                             canvas.drawPath(path, paint);
+
+                            paint.setXfermode(xfermode);
+                            canvas.drawLine(rectF.left, rectF.top, rectF.left, rectF.bottom, paint);
+                            paint.setXfermode(null);
+
+                            canvas.restoreToCount(layer);
                         } else {
                             fillLinesArray();
                             canvas.drawLines(linesArray, paint);
