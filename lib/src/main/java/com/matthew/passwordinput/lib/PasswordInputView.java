@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.os.Build;
 import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class PasswordInputView extends AppCompatEditText {
     private int maxLength;
     private int borderColor;
     private int pwdColor;
+    private int inputBorderColor;
 
     private int radius;
     private int spacing;
@@ -72,6 +74,7 @@ public class PasswordInputView extends AppCompatEditText {
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         this(context, attrs, android.R.attr.editTextStyle);
+//        this(context, attrs, R.style.PasswordInputViewStyle);
     }
 
     public PasswordInputView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -95,7 +98,11 @@ public class PasswordInputView extends AppCompatEditText {
         path = new Path();
         rectF = new RectF();
 
-        this.setBackgroundColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            this.setBackground(null);
+        } else {
+            this.setBackgroundDrawable(null);
+        }
         this.setCursorVisible(false);
         this.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
     }
@@ -106,6 +113,7 @@ public class PasswordInputView extends AppCompatEditText {
         maxLength = t.getInt(R.styleable.PasswordInputView_pwv_maxLength, 6);
         borderColor = t.getColor(R.styleable.PasswordInputView_pwv_borderColor, Color.GRAY);
         pwdColor = t.getColor(R.styleable.PasswordInputView_pwv_pwdColor, Color.GRAY);
+        inputBorderColor = t.getColor(R.styleable.PasswordInputView_pwv_haveInputBorderColor, borderColor);
         asterisk = t.getString(R.styleable.PasswordInputView_pwv_asterisk);
 
         if (asterisk == null || asterisk.length() == 0) asterisk = "*";
@@ -154,17 +162,22 @@ public class PasswordInputView extends AppCompatEditText {
 
     @Override
     protected void onDraw(Canvas canvas) {
-//        super.onDraw(canvas);
+//        super.onDraw(canvas); // 去掉EditText默认的绘制
 
         int top = getPaddingTop();
         int bottom = getHeight() - getPaddingBottom();
-        int start = getPaddingLeft();
-        float left;
+        int end = getWidth() - getPaddingRight();
+        float right;
 
-        for (int i = 0; i < maxLength; i++) {
+//        int start = getPaddingLeft();
+//        float left;
 
-            left = start + (boxWidth + spacing) * i;
-            rectF.set(left, top, left + boxWidth, bottom);
+        for (int i = maxLength - 1; i >= 0; i--) {
+//            left = start + (boxWidth + spacing) * i;
+//            rectF.set(left, top, left + boxWidth, bottom);
+
+            right = end - (boxWidth + spacing) * (maxLength - 1 - i);
+            rectF.set(right - boxWidth, top, right, bottom);
 
             drawBorder(canvas, i);
 
@@ -175,11 +188,14 @@ public class PasswordInputView extends AppCompatEditText {
     }
 
     private void drawBorder(Canvas canvas, int index) {
-        paint.setColor(borderColor);
+        paint.setColor(index < textLength ? inputBorderColor : borderColor);
         paint.setStyle(Paint.Style.STROKE);
         switch (borderStyle) {
-            case BorderStyle.BOX:// 边框模式，根据有没有圆角，有没有间距来绘制不同的样式
+            case BorderStyle.BOX:// 边框模式
                 if (radius == 0) {
+                    // 圆角为0，判断间距
+                    // 间距为0时第一个绘制方框，后边的每一个只绘制上、右、下三条边，避免重复绘制一条边
+                    // 如果间距不为0，直接绘制方框
                     if (spacing == 0) {
                         if (index == 0) {
                             canvas.drawRect(rectF, paint);
@@ -191,6 +207,8 @@ public class PasswordInputView extends AppCompatEditText {
                         canvas.drawRect(rectF, paint);
                     }
                 } else {
+                    // 圆角!=0
+                    // 策略同上，只是增加了圆角，没有间距并且有圆角的情况只绘制第一个和最后一个圆角
                     if (spacing == 0) {
                         if (index == 0) {
                             fillRadiusArray(true);
@@ -203,7 +221,8 @@ public class PasswordInputView extends AppCompatEditText {
                             path.addRoundRect(rectF, radiusArray, Path.Direction.CCW);
                             canvas.drawPath(path, paint);
                         } else {
-                            canvas.drawRect(rectF, paint);
+                            fillLinesArray();
+                            canvas.drawLines(linesArray, paint);
                         }
                     } else {
                         path.reset();
@@ -236,6 +255,7 @@ public class PasswordInputView extends AppCompatEditText {
         }
     }
 
+    // 间距为0,并且有圆角时，只绘制第一个和最后一个的圆角，这里填充圆角的数组
     private void fillRadiusArray(boolean firstOrLast) {
         if (firstOrLast) {
             radiusArray[0] = radius;
@@ -258,6 +278,7 @@ public class PasswordInputView extends AppCompatEditText {
         }
     }
 
+    // 间距为0时，第一个绘制方框，后边的每一个框均只绘制上右下三条边，这里是添加这三条边的数组
     private void fillLinesArray() {
         linesArray[0] = rectF.left;
         linesArray[1] = rectF.top;

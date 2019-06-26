@@ -5,6 +5,7 @@
 
         <attr name="pwv_borderColor" format="color" />
         <attr name="pwv_pwdColor" format="color" />
+        <attr name="pwv_haveInputBorderColor" format="color" />
 
         <attr name="pwv_strokeWidth" format="dimension" />
         <attr name="pwv_radius" format="dimension" />
