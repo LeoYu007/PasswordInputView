@@ -11,7 +11,7 @@
 * 设置边框和密码的颜色
 * 支持已输入部分单独设置颜色
 
-### [关于原理，很简单啦，继承EditText，去掉原生的super.onDraw()，然后绘制每个边框和密码。大家看一下源码，注释还算清楚。](https://github.com/LambertCoding/PasswordInputView/blob/master/lib/src/main/java/com/matthew/passwordinput/lib/PasswordInputView.java)
+### [关于原理](https://juejin.im/post/5d121b92e51d45108f254230)
 
 ## Usages
 
