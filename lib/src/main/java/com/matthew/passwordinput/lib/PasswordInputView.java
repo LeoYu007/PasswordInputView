@@ -69,7 +69,7 @@ public class PasswordInputView extends AppCompatEditText {
     public @interface PwdStyle {
         int CIRCLE = 0;// 圆点
         int ASTERISK = 1;// 星号
-        int PLAINTEXT = 2;// 星号
+        int PLAINTEXT = 2;// 明文
     }
 
     public PasswordInputView(Context context) {
@@ -102,7 +102,6 @@ public class PasswordInputView extends AppCompatEditText {
         path = new Path();
         rectF = new RectF();
 
-//        xfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT);
         xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_OUT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -252,7 +251,8 @@ public class PasswordInputView extends AppCompatEditText {
         paint.setStyle(Paint.Style.FILL);
         switch (pwdStyle) {
             case PwdStyle.CIRCLE:// 绘制圆点
-                canvas.drawCircle((rectF.left + rectF.right) / 2, (rectF.top + rectF.bottom) / 2, 8, paint);
+                canvas.drawCircle((rectF.left + rectF.right) / 2, (rectF.top + rectF.bottom) / 2,
+                        8, paint);
                 break;
             case PwdStyle.ASTERISK:// 绘制*号
                 canvas.drawText(asterisk, (rectF.left + rectF.right) / 2,
